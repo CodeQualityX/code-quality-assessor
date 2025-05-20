@@ -1,10 +1,12 @@
-from github_scraper import GitHubScraper
 import csv
 import os
 
+from github_scraper import GitHubScraper
+
+
 def process_repository(owner, repo, token=None, output_file="features.csv"):
     print(f"\n Processing repository: {owner}/{repo}")
-    
+
     scraper = GitHubScraper(token=token)
 
     # Step 1: Get repo metadata
@@ -42,6 +44,7 @@ def process_repository(owner, repo, token=None, output_file="features.csv"):
     else:
         print("No features to save.")
 
+
 def save_features_to_csv(objects, filename):
     file_exists = os.path.exists(filename)
     write_header = not file_exists or os.stat(filename).st_size == 0
@@ -49,20 +52,18 @@ def save_features_to_csv(objects, filename):
     with open(filename, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         header = list(vars(objects[0]).keys())
-        
+
         if write_header:
             writer.writerow(header)
-        
+
         for obj in objects:
             writer.writerow([getattr(obj, key) for key in header])
 
+
 if __name__ == "__main__":
-    token = "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"
-    repos = [
-        ("keon", "algorithms"),
-        ("psf", "requests"),
-        ("pallets", "flask")
-    ]
+    token = os.getenv("GITHUB_PAT", "")
+    repos = [("keon", "algorithms"), ("psf", "requests"), ("pallets", "flask")]
 
     for owner, repo in repos:
         process_repository(owner, repo, token, output_file="function_features.csv")
+
