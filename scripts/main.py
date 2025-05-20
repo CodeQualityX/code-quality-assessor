@@ -62,7 +62,20 @@ def save_features_to_csv(objects, filename):
 
 if __name__ == "__main__":
     token = os.getenv("GITHUB_PAT", "")
-    repos = [("keon", "algorithms"), ("psf", "requests"), ("pallets", "flask")]
+    repos = [
+        ("psf", "requests"),        # Popular HTTP library
+    ("pallets", "flask"),       # Lightweight web framework
+    ("django", "django"),       # High-level web framework
+    ("numpy", "numpy"),         # Numerical computing
+    ("pandas-dev", "pandas"),   # Data analysis
+    ("scikit-learn", "scikit-learn"),  # ML library
+    
+    # === Low-Quality/Educational Repos ===
+    ("satwikkansal", "wtfpython"),     # Confusing examples
+    ("geekcomputers", "Python"),       # Random scripts
+    ("aviaryan", "python-gems"),       # Inconsistent quality
+    ("realpython", "disaster-aversion-training")  # Intentional anti-patterns
+        ]
 
     for owner, repo in repos:
         process_repository(owner, repo, token, output_file="function_features.csv")

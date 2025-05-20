@@ -28,3 +28,4 @@ __pycache__/
 
 # DVC
 /data
+__pycache__/
