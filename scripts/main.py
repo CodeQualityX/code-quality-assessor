@@ -57,7 +57,7 @@ def save_features_to_csv(objects, filename):
             writer.writerow([getattr(obj, key) for key in header])
 
 if __name__ == "__main__":
-    token = "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"  # Replace safely!
+    token = "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"
     repos = [
         ("keon", "algorithms"),
         ("psf", "requests"),
