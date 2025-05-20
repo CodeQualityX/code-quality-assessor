@@ -29,3 +29,5 @@ __pycache__/
 # DVC
 /data
 __pycache__/
+__pycache__/
+*.py[cod]
