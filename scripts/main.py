@@ -85,7 +85,7 @@ if __name__ == "__main__":
     ("satwikkansal", "wtfpython"),     # Confusing examples
     ("geekcomputers", "Python"),       # Random scripts
     ("aviaryan", "python-gems"),       # Inconsistent quality
-    ("realpython", "disaster-aversion-training")  # Intentional anti-patterns
+    ("realpython", "disaster-aversion-training"),  # Intentional anti-patterns
     #  bad codes examples
     ("TheAlgorithms", "Python"),      # Collection of algorithms in Python
     ("TheAlgorithms", "Python-Data-Structures"),  # Data structures in Python
@@ -161,6 +161,21 @@ if __name__ == "__main__":
 
         ]
 
-    for owner, repo in repos:
-        process_repository(owner, repo, token, output_file="function_features.csv")
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if __name__ == "__main__":
+        token = os.getenv("GITHUB_PAT", "")
+        output_file = "function_features.csv"
+
+        def run_job(repo_tuple):
+            owner, repo = repo_tuple
+            process_repository(owner, repo, token=token, output_file=output_file)
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(run_job, repo_pair) for repo_pair in repos]
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Error processing a repository: {e}")
 
