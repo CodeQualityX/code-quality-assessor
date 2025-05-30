@@ -1,6 +1,7 @@
 import csv
 import os
 
+import requests
 from github_scraper import GitHubScraper
 
 
@@ -60,9 +61,55 @@ def save_features_to_csv(objects, filename):
             writer.writerow([getattr(obj, key) for key in header])
 
 
+def get_top_python_repos(x, github_token=None):
+    headers = {"Authorization": f"token {github_token}"} if github_token else {}
+    repos = []
+    per_page = 100
+
+    # Define descending star buckets (you can adjust ranges)
+    star_ranges = [
+        "stars:>50000",
+        "stars:20000..50000",
+        "stars:10000..20000",
+        "stars:5000..10000",
+        "stars:1000..5000",
+        "stars:500..1000",
+        "stars:100..500",
+        "stars:50..100",
+        "stars:25..50",
+        "stars:10..25",
+    ]
+
+    for star_filter in star_ranges:
+        for page in range(1, 11):  # 10 pages max (10 * 100 = 1000)
+            if len(repos) >= x:
+                return repos
+
+            url = (
+                f"https://api.github.com/search/repositories"
+                f"?q=language:python+{star_filter}&sort=stars&order=desc"
+                f"&per_page={per_page}&page={page}"
+            )
+            resp = requests.get(url, headers=headers)
+            if resp.status_code != 200:
+                raise Exception(f"GitHub API error: {resp.status_code}, {resp.text}")
+            data = resp.json()
+
+            for item in data.get("items", []):
+                repos.append((item["owner"]["login"], item["name"]))
+                if len(repos) == x:
+                    return repos
+
+            if len(data.get("items", [])) < per_page:
+                break  # No more data in this bucket
+
+    return repos
+
+
 if __name__ == "__main__":
     token = os.getenv("GITHUB_PAT", "")
-    repos = [
+    # NOTE: initial repo list
+    repos = {
         ("psf", "requests"),  # Popular HTTP library
         ("pallets", "flask"),  # Lightweight web framework
         ("django", "django"),  # High-level web framework
@@ -233,7 +280,9 @@ if __name__ == "__main__":
         ("python", "python-utilities"),  # Utility scripts
         ("python", "python-education"),  # Educational resources
         ("python", "python-community"),  # Community-driven projects
-    ]
+    }
+    # NOTE: add the top 1000 most-starred Python repos
+    repos.update(get_top_python_repos(1000, token))
 
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
